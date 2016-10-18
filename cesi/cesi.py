@@ -3,9 +3,10 @@ import ConfigParser
 from datetime import datetime, timedelta
 from flask import jsonify
 
+
 CONFIG_FILE = "/etc/cesi.conf"
 class Config:
-    
+
     def __init__(self, CFILE):
         self.CFILE = CFILE
         self.cfg = ConfigParser.ConfigParser()
@@ -26,11 +27,19 @@ class Config:
             if name[:5] == 'group':
                 self.group_list.append(name[6:])
 
-        
+
     def getNodeConfig(self, node_name):
         self.node_name = "node:%s" % (node_name)
-        self.username = self.cfg.get(self.node_name, 'username')
-        self.password = self.cfg.get(self.node_name, 'password')
+        try:
+          self.username = self.cfg.get(self.node_name, 'username')
+        except ConfigParser.NoOptionError as _:
+          self.username = None
+          self.password = None
+        else:
+          try:
+            self.password = self.cfg.get(self.node_name, 'password')
+          except ConfigParser.NoOptionError as _:
+            self.password = None
         self.host = self.cfg.get(self.node_name, 'host')
         self.port = self.cfg.get(self.node_name, 'port')
         self.node_config = NodeConfig(self.node_name, self.host, self.port, self.username, self.password)
@@ -59,7 +68,7 @@ class NodeConfig:
         self.port = port
         self.username = username
         self.password = password
-            
+
 
 class Node:
 
@@ -86,7 +95,7 @@ class Connection:
 
     def getConnection(self):
         return xmlrpclib.Server(self.address)
-        
+
 
 class ProcessInfo:
 
@@ -111,7 +120,7 @@ class ProcessInfo:
         self.uptime = str(timedelta(seconds=self.seconds))
 
 class JsonValue:
-    
+
     def __init__(self, process_name, node_name, event):
         self.process_name = process_name
         self.event = event
@@ -126,7 +135,7 @@ class JsonValue:
                        nodename = self.node_name,
                        data = self.node.connection.supervisor.getProcessInfo(self.process_name))
 
-    def error(self, code, payload):     
+    def error(self, code, payload):
         self.code = code
         self.payload = payload
         return jsonify(status = "Error",
@@ -134,5 +143,5 @@ class JsonValue:
                        message = "%s %s %s event unsuccesful" %(self.node_name, self.process_name, self.event),
                        nodename = self.node_name,
                        payload = self.payload)
- 
+
 
