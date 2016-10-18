@@ -1,5 +1,4 @@
-from distutils.core import setup
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
   name='cesi',
@@ -11,7 +10,7 @@ setup(
   author='Gulsah Kose',
   author_email='gulsah.1004@gmail.com',
   install_requires=[
-  "Flask==0.10.1"
+    "Flask>=0.10.1"
   ],
   include_package_data=True,
   packages=['pack'],

@@ -1,12 +1,10 @@
-from flask import Flask, render_template, url_for, redirect, jsonify, request, g, session, flash
-from cesi import Config, Connection, Node, CONFIG_FILE, ProcessInfo, JsonValue
+from flask import Flask, render_template, url_for, redirect, jsonify, request, g, session
+from cesi import Config, Node, CONFIG_FILE, JsonValue
 from datetime import datetime
-import cesi 
 import xmlrpclib
 import sqlite3
 import mmap
 import os
-import time
 
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -55,7 +53,7 @@ def getlogtail():
         except (UnboundLocalError, TypeError):
             return jsonify(status="error",
                            message = "Activity log file is empty")
-            
+
 
 
 
@@ -117,14 +115,12 @@ def showMain():
             usertype = "Only Log"
         elif session['usertype']==3:
             usertype = "Read Only"
- 
+
         all_process_count = 0
         running_process_count = 0
         stopped_process_count = 0
-        member_names = []
         environment_list = []
         g_node_list = []
-        g_process_list = []
         g_environment_list = []
         group_list = []
         not_connected_node_list = []
@@ -133,7 +129,7 @@ def showMain():
         node_name_list = Config(CONFIG_FILE).node_list
         node_count = len(node_name_list)
         environment_name_list = Config(CONFIG_FILE).environment_list
-        
+
 
         for nodename in node_name_list:
             nodeconfig = Config(CONFIG_FILE).getNodeConfig(nodename)
@@ -161,15 +157,15 @@ def showMain():
                 if process.state==0:
                     stopped_process_count = stopped_process_count + 1
 
-        # get environment list 
+        # get environment list
         for env_name in environment_name_list:
             env_members = Config(CONFIG_FILE).getMemberNames(env_name)
             for index, node in enumerate(env_members):
                 if not node in connected_node_list:
                     env_members.pop(index);
-            environment_list.append(env_members)        
-                    
-        
+            environment_list.append(env_members)
+
+
         for g_name in group_list:
             tmp= []
             for nodename in connected_node_list:
@@ -191,7 +187,7 @@ def showMain():
                             if not env_name in tmp:
                                 tmp.append(env_name)
             g_environment_list.append(tmp)
-        
+
         connected_count = len(connected_node_list)
         not_connected_count = len(not_connected_node_list)
 
@@ -212,7 +208,7 @@ def showMain():
                                 username = session['username'],
                                 usertype = usertype,
                                 usertypecode = session['usertype'])
-    else:   
+    else:
         return redirect(url_for('login'))
 
 
@@ -223,7 +219,7 @@ def showNode(node_name):
         node_config = Config(CONFIG_FILE).getNodeConfig(node_name)
         add_log = open(ACTIVITY_LOG, "a")
         add_log.write("%s - %s viewed node %s .\n"%( datetime.now().ctime(), session['username'], node_name ))
-        return jsonify( process_info = Node(node_config).process_dict) 
+        return jsonify( process_info = Node(node_config).process_dict)
     else:
         add_log = open(ACTIVITY_LOG, "a")
         add_log.write("%s - Illegal request for view node %s .\n"%( datetime.now().ctime(), node_name ))
@@ -298,7 +294,7 @@ def json_start(node_name, process_name):
                 add_log = open(ACTIVITY_LOG, "a")
                 add_log.write("%s - %s unsucces start event %s node's %s process .\n"%( datetime.now().ctime(), session['username'], node_name, process_name ))
                 return JsonValue(process_name, node_name, "start").error(err.faultCode, err.faultString)
-        else:   
+        else:
             add_log = open(ACTIVITY_LOG, "a")
             add_log.write("%s - %s is unauthorized user request for start. Start event fail for %s node's %s process .\n"%( datetime.now().ctime(), session['username'], node_name, process_name ))
             return jsonify(status = "error2",
@@ -527,7 +523,7 @@ def changepasswordhandler(username):
         return redirect(url_for('login'))
 
 @app.errorhandler(404)
-def page_not_found(error):
+def page_not_found(_):
     return render_template('page_not_found.html'), 404
 
 try:
