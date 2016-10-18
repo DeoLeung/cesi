@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='cesi',
-      version='0.1.0-test-0',
+      version='0.1.0',
       description='Centralized supervisor interface.',
       long_description=('uzun tanimlama'),
       url='http://github.com/GulsahKose/cesi',
@@ -11,10 +11,11 @@ setup(name='cesi',
       install_requires=[
         "Flask>=0.10.1"
       ],
+      scripts=['bin/cesi'],
       include_package_data=True,
       packages=['pack'],
       package_dir={
-        'pack': 'pack',
+        'pack': 'cesi',
       },
       package_data={
         'pack': [

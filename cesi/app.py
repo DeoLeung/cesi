@@ -604,12 +604,3 @@ def changepasswordhandler(username):
 @app.errorhandler(404)
 def page_not_found(_):
   return render_template('page_not_found.html'), 404
-
-
-try:
-  if __name__ == '__main__':
-    app.run(debug=True, use_reloader=True, host=HOST)
-except xmlrpclib.Fault as err:
-  print "A fault occurred"
-  print "Fault code: %d" % err.faultCode
-  print "Fault string: %s" % err.faultString
